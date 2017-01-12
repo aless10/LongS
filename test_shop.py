@@ -9,12 +9,26 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions
 import random
 
+#FUNZIONE AUSILIARIA CHE MI PERMETTE DI CONVERTIRE I PREZZI IN NUMERI COSI' POSSO FARE I CALCOLI
+def price_converter(price):
+    '''
+    :param price: string
+    :return: float price
+    '''
+    price = list(price)
+    price.remove('€')
+    price.remove(' ')
+    for i, j in enumerate(price):
+        price[i] = j.replace(',', '.')
+    price = float(''.join(price))
+    return price
+
 
 class MyBagTest(unittest.TestCase):
 
     @classmethod
     def setUp(cls):
-        cls.driver = webdriver.Chrome()#QUI AGGIUNGO IL PATH AL CHROMEDRIVER
+        cls.driver = webdriver.Chrome() #QUI AGGIUNGO IL PATH AL CHROMEDRIVER
         cls.driver.maximize_window()
         # navigate to the application home page
         cls.driver.get("http://dev:dev@ux.tannerie.doppiozero.to/it/")
@@ -28,7 +42,7 @@ class MyBagTest(unittest.TestCase):
         category = self.driver.find_elements_by_xpath("//a[@class='effect-bubba link-cat']")
         select_category = random.choice(category)
         select_category.click()
-        products_name = self.driver.find_elements_by_xpath("//h2[@class='box-title']")
+        products_name = WebDriverWait(self.driver, 10).until(expected_conditions.presence_of_all_elements_located((By.CLASS_NAME, "box-title")))
         products_price = self.driver.find_elements_by_xpath("//span[@class='price']")
         # DA AGGIUNGERE IL TRACCIAMENTO IMMAGINI PRODOTTO
         # scelgo un prodotto random
@@ -46,22 +60,32 @@ class MyBagTest(unittest.TestCase):
         self.assertEqual(check_price.text, rand_product[1])
         #SALVO IL CODICE PRODOTTO
         product_code = self.driver.find_element_by_xpath("//p[@class='product-code']").text
-        #driver.save_screenshot('screenshot.png') #screenshot pagina
         add_cart_btn = self.driver.find_element_by_xpath("//button[@id='add_cart_btn']")
-        print(add_cart_btn.location)
-        # CLICCO SU ACQUISTA::: ERRORE NON MI VEDE/CLICCA IL BOTTONE
-        add_cart_btn.click()
-        #NAVIGO SULLA MODALE
-        modal_page = self.driver.find_element_by_xpath("//div[@class='modal-body']")
-        modal_prod_name = modal_page.find_element_by_xpath("//h4[@class='bold color-dorato']")
-        modal_prod_name = modal_prod_name.text
-        #CONTROLLO CHE IL NOME ARTICOLO SIA CORRETTO
-        self.assertEqual(modal_prod_name, rand_product[0])
-        modal_prod_code = modal_page.find_element_by_xpath("//p[@class='product-code']").text
-        self.assertEqual(modal_prod_code, product_code)
-        #AGGIUNGO AL CARRELLO
-        modal_page.find_element_by_xpath("//a[@class='btn addedcart-btn pull-right']").click()
-
+        try:
+            #not(self.driver.find_element_by_xpath("//p[@class='product-errormsg error-msg']").is_displayed())
+            not(self.driver.find_element_by_xpath("//div[@class='alert alert-danger non-field-error']").is_displayed())
+        except:
+            print('Prodotto non disponibile')
+            #ANDREBBE CONTROLLATO CHE IL CARRELLO RIMANE INALTERATO
+        add_cart_btn.submit()#QUI SALTA TUTTA LA PARTE DELLA MODALE CON SUBMIT
+        #ORA SONO NEL CARRELLO
+        shopping_bag_prod = self.driver.find_element_by_xpath("//a[@class='cart-item']")
+        shopping_bag_name = shopping_bag_prod.text
+        #self.assertEqual(shopping_bag_name, check_name.text)
+        shopping_bag_code = shopping_bag_prod.find_elements_by_xpath("span[@class='cart-details']")[1].text
+        self.assertEqual(shopping_bag_code, product_code)
+        shopping_bag_price = self.driver.find_elements_by_tag_name('td')[2].text #PREZZO è IL TERZO ELEMENTO DELLA RIGA
+        shopping_bag_price = price_converter(shopping_bag_price)
+        #shopping_bag_quantity = int(self.driver.find_elements_by_tag_name('td')[3].text)
+        shopping_bag_total_price = self.driver.find_elements_by_tag_name('td')[4].text
+        price_to_check = price_converter(shopping_bag_total_price)
+        #CHECK SU PREZZO UNITARIO * QUANTITA' = PREZZO TOTALE
+        self.assertEqual(price_to_check, shopping_bag_price) # DA AGGIUNGERE IL CHECK PER QUANTITA' * shopping_bag_quantity)
+        #CHECKOUT
+        checkout_area = self.driver.find_element_by_xpath("//div[@class='form-actions clearfix']")
+        checkout_button = checkout_area.find_element_by_xpath("a[@class='btn btn-lg pull-right']")
+        checkout_button.click()
+        #INSERIRE I DATI PER L'ACQUISTO
 
     @classmethod
     def tearDownClass(cls):
