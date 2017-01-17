@@ -10,16 +10,16 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support import expected_conditions
 import random
-from .config import base_url
+from doppiozero_test.test_tannery_doppiozero.config import base_url
 from time import gmtime, strftime, sleep
-from .utils import price_converter
+from doppiozero_test.test_tannery_doppiozero.utils import price_converter
 
 
 class BuyAProductTest(unittest.TestCase):
 
     @classmethod
     def setUp(cls):
-        cls.driver = webdriver.Chrome('/home/ale/VirtuaPyCharm/bin/chrome/chromedriver') #QUI AGGIUNGO IL PATH AL CHROMEDRIVER
+        cls.driver = webdriver.Chrome() #QUI AGGIUNGO IL PATH AL CHROMEDRIVER
         cls.driver.maximize_window()
         # navigate to the application home page
         cls.driver.get(base_url)
@@ -130,16 +130,15 @@ class BuyAProductTest(unittest.TestCase):
         password.send_keys('Nonlaso00')
         self.driver.find_element_by_id('btnLogin').submit()
         #DA AGGIUNGERE I CHECK PREZZI
-
         check_out_paypal = WebDriverWait(self.driver, 20).until(expected_conditions.presence_of_element_located((By.ID, "confirmButtonTop")))
-        #check_out_paypal.click()
+        check_out_paypal.click()
         sleep(5)
-        #self.assertEqual(self.driver.current_url, "http://ux.tannerie.doppiozero.to/it/shop/checkout/complete/")
+        self.assertEqual(self.driver.current_url, "http://ux.tannerie.doppiozero.to/it/shop/checkout/complete/")
 
-    # @classmethod
-    # def tearDownClass(cls):
-    # #    #close the browser window
-    #     cls.driver.quit()
+    @classmethod
+    def tearDownClass(cls):
+    #    #close the browser window
+         cls.driver.quit()
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
