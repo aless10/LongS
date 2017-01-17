@@ -19,7 +19,7 @@ class BuyAProductTest(unittest.TestCase):
 
     @classmethod
     def setUp(cls):
-        cls.driver = webdriver.Chrome('/home/ale/VirtuaPyCharm/bin/chrome/chromedriver') #QUI AGGIUNGO IL PATH AL CHROMEDRIVER
+        cls.driver = webdriver.Chrome() #QUI AGGIUNGO IL PATH AL CHROMEDRIVER
         cls.driver.maximize_window()
         # navigate to the application home page
         cls.driver.get(base_url)
@@ -132,14 +132,14 @@ class BuyAProductTest(unittest.TestCase):
         #DA AGGIUNGERE I CHECK PREZZI
 
         check_out_paypal = WebDriverWait(self.driver, 20).until(expected_conditions.presence_of_element_located((By.ID, "confirmButtonTop")))
-        #check_out_paypal.click()
+        check_out_paypal.click()
         sleep(5)
-        #self.assertEqual(self.driver.current_url, "http://ux.tannerie.doppiozero.to/it/shop/checkout/complete/")
+        self.assertEqual(self.driver.current_url, "http://ux.tannerie.doppiozero.to/it/shop/checkout/complete/")
 
-    # @classmethod
-    # def tearDownClass(cls):
+    @classmethod
+    def tearDownClass(cls):
     # #    #close the browser window
-    #     cls.driver.quit()
+        cls.driver.quit()
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
