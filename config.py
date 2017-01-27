@@ -6,7 +6,6 @@ from time import gmtime, strftime, sleep
 
 # percorso per caricare il chromedriver
 path_to_chrome = '/home/ale/VirtuaPyCharm/bin/chrome/chromedriver'
-num_elements_to_test = 2
 email = 'andrea.doppiozero-buyer@gmail.com'
 password = 'Nonlaso00'
 states = {'Austria': 15.0, 'Italia': 10.0, 'USA': 35.0}
@@ -27,6 +26,9 @@ class Company(object):
     def modal_page_code(self):
         return True
 
+    def total_in_table(self):
+        return False
+
     def back_to_shop(self):
         return True
 
@@ -35,6 +37,10 @@ class Company(object):
 
     def road_to_paypal(self):
         return True
+
+    def states(self):
+        states = {'Austria': 15.0, 'Italia': 10.0, 'USA': 35.0}
+        return states
 
     def get_cookie(self):
         return "//a[@id='cookieChoiceDismiss']"
@@ -50,15 +56,15 @@ class Company(object):
 
     def get_user_data(self):
         user_data = {
-        'first_name' : "id_billing_detail_first_name",
-        'last_name' : "id_billing_detail_last_name",
-        'street' : "id_billing_detail_street",
-        'city' : "id_billing_detail_city",
-        'state' : "id_billing_detail_state",
-        'postcode' : "id_billing_detail_postcode",
-        'phone' : "id_billing_detail_phone",
-        'email' : "id_billing_detail_email",
-        'add_instruction' : "id_additional_instructions",
+        'first_name': "id_billing_detail_first_name",
+        'last_name': "id_billing_detail_last_name",
+        'street': "id_billing_detail_street",
+        'city': "id_billing_detail_city",
+        'state': "id_billing_detail_state",
+        'postcode': "id_billing_detail_postcode",
+        'phone': "id_billing_detail_phone",
+        'email': "id_billing_detail_email",
+        'add_instruction': "id_additional_instructions",
         }
         return user_data
 
@@ -77,9 +83,15 @@ class Tannerie(Company):
     def road_to_paypal(self):
         return False
 
+    def total_in_table(self):
+        return True
+
     def get_url(self):
         base_url = 'http://dev:dev@ux.tannerie.doppiozero.to/it/donna/?cat%5B%5D=Borse+a+mano'
         return base_url
+
+    def get_product_page_link(self):
+        return "//h2[@class='box-title']"
 
     def get_products_name(self):
         return "box-title"
@@ -95,6 +107,9 @@ class Tannerie(Company):
 
     def get_modal_page_name(self):
         return "//h4[@class='bold color-dorato']"
+
+    def before_code(self):
+        return False
 
     def continue_button(self):
         return 'btn' and 'addedcart-btn' and 'pull-left'
@@ -136,17 +151,22 @@ class Plm(Company):
     def back_to_shop(self):
         return False
 
+    def states(self):
+        states = ['Albania', 'Algeria']
+        return states
 
     def get_url(self):
-        base_url = 'http://pierrelouismascia.com/shop/' #@dev:dev@ux.
+        base_url = 'http://@dev:dev@ux.plm.doppiozero.to/shop/'
         return base_url
+
+    def get_product_page_link(self):
+        return "//h5[@class='product-thumb__title']"
 
     def get_products_name(self):
         return 'product-thumb__title'
 
     def get_product_code(self):
         path = "//div[@class='product-info__description']"
-
         return path
 
     def get_single_product_name(self):
@@ -157,6 +177,9 @@ class Plm(Company):
 
     def get_modal_page_name(self):
         return "//div[@class='col-sm-8 addedcart__dataprod']/h5"
+
+    def before_code(self):
+        return True
 
     def continue_button(self):
         return 'btn' and 'addedcart__btn' and 'addedcart__btn--continue'
@@ -186,7 +209,7 @@ site_to_test = {'tannerie' : Tannerie(), 'plm': Plm()}
 
 site_choice = input('Scegli il sito: ')
 site_choice = site_choice.lower()
-quantity = input('quanti articoli vuoi comprare? ')
+num_elements_to_test = int(input('quanti articoli vuoi comprare? '))
 print('Grazie, ora inizio il test sul sito ' + site_choice.capitalize())
 print('Ora del test: ' + strftime("%Y/%m/%d - %H:%M:%S", gmtime()))
 
