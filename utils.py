@@ -18,16 +18,19 @@ def price_converter(price):
     price = float(''.join(price))
     return price
 
+
 # Funzione per salvare solo il codice
 def slice_code(code):
     code_only = code.split(': ')
     code_only = code_only[1]
     return code_only
 
+
 # Funzione per salvare il nome prodotto nel riepilogo
 def slice_prod_name(name):
     product_name = name.split(' Colore')[0]
     return product_name
+
 
 #Funzione per salvare solo il prezzo
 def slice_prod_price(price):
@@ -45,16 +48,16 @@ def check_products_prizes(test, driver, products_info):
     for row in cart_rows:
         shopping_bag_prod = row.find_elements_by_tag_name('td')[1]
         shopping_bag_name = shopping_bag_prod.find_element_by_xpath("//strong").text
-        #print(shopping_bag_name, n)
+        print(shopping_bag_name, n)
         test.assertEqual(shopping_bag_name, products_info['product ' + str(n)]['name'])
         shopping_bag_code = slice_code(\
-            shopping_bag_prod.find_elements_by_xpath("//span[@class='cart-details']")[1].text)
-        #print(shopping_bag_prod, n)
+            shopping_bag_prod.find_elements_by_class_name('cart-details')[1].text)
+        print(shopping_bag_prod, n)
         # TEST CODICE PRODOTTO
         test.assertEqual(shopping_bag_code, products_info['product ' + str(n)]['code'])
         shopping_bag_price_1 = row.find_elements_by_tag_name('td')[2].text
         shopping_bag_price = price_converter(shopping_bag_price_1)
-        #print(shopping_bag_price)
+        print(shopping_bag_price)
         test.assertEqual(shopping_bag_price, products_info['product ' + str(n)]['price'])
         quantity = row.find_elements_by_tag_name('td')[3]
         shopping_bag_quantity = int(quantity.find_element_by_tag_name('input').get_attribute('value'))
@@ -64,6 +67,7 @@ def check_products_prizes(test, driver, products_info):
         test.assertEqual(price_to_check, shopping_bag_price * shopping_bag_quantity)
         total_price += price_to_check
         n += 1
+        print(total_price)
     return total_price
 
 
