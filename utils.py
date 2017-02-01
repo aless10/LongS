@@ -1,4 +1,6 @@
-import re
+import os
+from time import gmtime, strftime
+from config import site_choice
 
 #FUNZIONE AUSILIARIA CHE MI PERMETTE DI CONVERTIRE I PREZZI IN NUMERI COSI' POSSO FARE I CALCOLI
 def price_converter(price):
@@ -9,7 +11,8 @@ def price_converter(price):
     price = list(price)
     if '€' in price:
         price.remove('€')
-    price.remove(' ')
+    if ' ' in price:
+        price.remove(' ')
     if ',' in price:
         price.remove(',')
     if '.' in price:
@@ -23,6 +26,7 @@ def price_converter(price):
 def slice_code(code):
     code_only = code.split(': ')
     code_only = code_only[1]
+    code_only = code_only.replace('\n', ' ')
     return code_only
 
 
@@ -42,32 +46,38 @@ def slice_prod_price(price):
 def check_products_prizes(test, driver, products_info):
     cart_table = driver.find_element_by_xpath("//tbody")
     cart_rows = cart_table.find_elements_by_tag_name('tr')
-    cart_rows.pop()
+    if test.company.total_in_table():
+        cart_rows.pop()
     total_price = 0
     n = 0
     for row in cart_rows:
         shopping_bag_prod = row.find_elements_by_tag_name('td')[1]
         shopping_bag_name = shopping_bag_prod.find_element_by_xpath("//strong").text
-        print(shopping_bag_name, n)
-        test.assertEqual(shopping_bag_name, products_info['product ' + str(n)]['name'])
-        shopping_bag_code = slice_code(\
-            shopping_bag_prod.find_elements_by_class_name('cart-details')[1].text)
-        print(shopping_bag_prod, n)
+        #test.assertEqual(shopping_bag_name, products_info['product ' + str(n)]['name'])
+        if test.company.before_code():
+            shopping_bag_code = slice_code(\
+                shopping_bag_prod.find_elements_by_xpath("//p[@class='cart-details']")[0].text)
+        else:
+            shopping_bag_code = slice_code(\
+                shopping_bag_prod.find_elements_by_xpath("//span[@class='cart-details']")[1].text)
+
         # TEST CODICE PRODOTTO
-        test.assertEqual(shopping_bag_code, products_info['product ' + str(n)]['code'])
+        #test.assertEqual(shopping_bag_code, products_info['product ' + str(n)]['code'])
         shopping_bag_price_1 = row.find_elements_by_tag_name('td')[2].text
         shopping_bag_price = price_converter(shopping_bag_price_1)
-        print(shopping_bag_price)
         test.assertEqual(shopping_bag_price, products_info['product ' + str(n)]['price'])
         quantity = row.find_elements_by_tag_name('td')[3]
         shopping_bag_quantity = int(quantity.find_element_by_tag_name('input').get_attribute('value'))
         shopping_bag_total_price = row.find_elements_by_tag_name('td')[4].text
         price_to_check = price_converter(shopping_bag_total_price)
         # CHECK SU PREZZO UNITARIO * QUANTITA' = PREZZO TOTALE
-        test.assertEqual(price_to_check, shopping_bag_price * shopping_bag_quantity)
+        try:
+            test.assertEqual(price_to_check, shopping_bag_price * shopping_bag_quantity)
+        except:
+            screen_name = 'code_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
+            test.driver.save_screenshot(os.path.join(site_choice, screen_name))
         total_price += price_to_check
         n += 1
-        print(total_price)
     return total_price
 
 

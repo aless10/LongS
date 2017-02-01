@@ -26,6 +26,10 @@ class BuyAProductTest(unittest.TestCase):
         cls.driver.get(cls.company.get_url())
 
     def test_buy_and_checkout(self):
+        try:
+            os.mkdir('./' + site_choice)
+        except:
+            pass
         self.driver.find_element_by_xpath(self.company.get_cookie()).click()
         sleep(2)
         #PAGINA PRODOTTI
@@ -45,11 +49,17 @@ class BuyAProductTest(unittest.TestCase):
 
             #------PAGINA PRODOTTO-------
 
-            check_name = self.driver.find_element_by_xpath(self.company.get_single_product_name()).text
-            check_price = price_converter(self.driver.find_element_by_xpath(self.company.get_single_product_price()).text)
-            #TEST SU NOME E PREZZO
-            self.assertEqual(check_name, rand_product[0])
-            self.assertEqual(check_price, rand_product[1])
+            try:
+                check_name = self.driver.find_element_by_xpath(self.company.get_single_product_name()).text
+                check_price = price_converter(self.driver.find_element_by_xpath(self.company.get_single_product_price()).text)
+                #TEST SU NOME E PREZZO
+                self.assertEqual(check_name, rand_product[0])
+                self.assertEqual(check_price, rand_product[1])
+            except:
+                screen_name = 'product_price_name_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
+                self.driver.save_screenshot(os.path.join(site_choice, screen_name))
+                raise
+
             #SALVO IL CODICE PRODOTTO
             if self.company.get_code():
                 right_div = self.driver.find_element_by_xpath(\
@@ -77,11 +87,14 @@ class BuyAProductTest(unittest.TestCase):
                                             By.CLASS_NAME, 'modal' and 'fade' and 'addedcart' and 'in')))
                 modal_page = self.driver.find_element_by_xpath(self.company.get_modal_page_name())
                 modal_page_name = modal_page.text
-                #modal_page_name = modal_page.find_element_by_xpath(self.company.get_modal_page_name()).text
                 self.assertEqual(modal_page_name, check_name)
                 if self.company.modal_page_code():
-                    modal_page_code = slice_code(self.driver.find_element_by_xpath("//p[@class='product-code']").text)
-                    self.assertEqual(modal_page_code, product_code)
+                    try:
+                        modal_page_code = slice_code(self.driver.find_element_by_xpath("//p[@class='product-code']").text)
+                        self.assertEqual(modal_page_code, product_code)
+                    except:
+                        screen_name = 'modal_code_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
+                        self.driver.save_screenshot(os.path.join(site_choice, screen_name))
 
                 products_info['product ' + str(n)] = {'name': rand_product[0], 'price': rand_product[1], 'code': product_code}
                 if n != num_elements_to_test - 1:
@@ -104,32 +117,47 @@ class BuyAProductTest(unittest.TestCase):
         #ORA SONO NEL CARRELLO
 
         total_price = check_products_prizes(self, self.driver, products_info)
-        total_shopping_bag = slice_prod_price(self.driver.find_element_by_xpath(self.company.get_total_price()).text)
-        total_shopping_bag = price_converter(total_shopping_bag)
-        self.assertEqual(total_price, total_shopping_bag)
+        try:
+            total_shopping_bag = slice_prod_price(self.driver.find_element_by_xpath(self.company.get_total_price()).text)
+            total_shopping_bag = price_converter(total_shopping_bag)
+            self.assertEqual(total_price, total_shopping_bag)
+        except:
+            screen_name = 'total_shopping_bag_price_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
+            self.driver.save_screenshot(os.path.join(site_choice, screen_name))
 
         #CHECKOUT
         checkout_button = self.driver.find_element_by_xpath(self.company.go_check_out())
         checkout_button.click()
-
-        check_out_total = check_out_total_func(self.driver)
-        total = self.driver.find_element_by_xpath(self.company.get_total_price()).text
-        total = price_converter(slice_prod_price(total))
-        #self.assertEqual(total, check_out_total)
+        sleep(1)
+        try:
+            check_out_total = check_out_total_func(self.driver)
+            total = self.driver.find_element_by_xpath(self.company.get_total_price()).text
+            total = price_converter(slice_prod_price(total))
+            self.assertEqual(total, check_out_total)
+        except:
+            screen_name = 'product_total_price_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
+            self.driver.save_screenshot(os.path.join(site_choice, screen_name))
 
         #INSERIRE I DATI PER L'ACQUISTO
         sleep(2)
         first_name = self.driver.find_element_by_id(self.company.get_user_data()['first_name'])
         first_name.send_keys('Test Name')
         last_name = self.driver.find_element_by_id(self.company.get_user_data()['last_name'])
-        last_name.send_keys(strftime("%Y%m%d%H%M%S", gmtime()))
+        last_name.send_keys(strftime("%Y/%m/%d - %H:%M:%S", gmtime()))
         address = self.driver.find_element_by_id(self.company.get_user_data()['street'])
         address.send_keys('Test Street')
         city = self.driver.find_element_by_id(self.company.get_user_data()['city'])
         city.send_keys('Test city')
-        state = Select(self.driver.find_element_by_id(self.company.get_user_data()['state']))
-        random_state = random.choice(list(self.company.states()))
-        selected_state = state.select_by_visible_text(random_state)
+        if self.company.select_state():
+            state = Select(self.driver.find_element_by_id(self.company.get_user_data()['state']))
+            random_state = random.choice(list(self.company.states()))
+            selected_state = state.select_by_visible_text(random_state)
+        else:
+            random_state = random.choice(list(self.company.states()))
+            box_state = self.driver.find_element_by_id('id_billing_detail_state_chosen')
+            box_state.click()
+            input_box = self.driver.find_element_by_xpath("//div[@class='chosen-search']/input[@type='text']").send_keys(random_state)
+            self.driver.find_element_by_xpath("//li[@class='active-result highlighted']").click()
         postal_code = self.driver.find_element_by_id(self.company.get_user_data()['postcode'])
         postal_code.send_keys('9999')
         phone = self.driver.find_element_by_id(self.company.get_user_data()['phone'])
@@ -138,10 +166,9 @@ class BuyAProductTest(unittest.TestCase):
         email_address.send_keys('test@example.com')
         text_area = self.driver.find_element_by_id(self.company.get_user_data()['add_instruction'])
         text_area.send_keys('Test Additional Instruction')
-        terms_and_conditions = WebDriverWait(self.driver, 20).until(\
-            expected_conditions.presence_of_all_elements_located((By.ID, self.company.terms_and_conditions())))[0]
-        self.assertFalse(terms_and_conditions.is_selected())
-        terms_and_conditions.submit()
+        terms_and_conditions = WebDriverWait(self.driver, 20).until( \
+              expected_conditions.presence_of_element_located((By.XPATH, self.company.terms_and_conditions()))).click()
+        self.driver.find_element_by_xpath(self.company.checkout_paypal()).click()
         #FINE INSERIMENTO DATI
 
         #TEST SUI PREZZI SINGOLI E TOTALI
@@ -149,15 +176,23 @@ class BuyAProductTest(unittest.TestCase):
         total = self.driver.find_element_by_xpath(self.company.get_total_price()).text
         total = price_converter(slice_prod_price(total))
         if self.company.pay_ship():
-            sub_total = price_converter(\
-                slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[0].text))
-            shipping = price_converter(\
-                slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[1].text))
-            self.assertEqual(states[random_state], shipping)
-            self.assertEqual(check_out_total, sub_total)
-            self.assertEqual(total, sub_total + shipping)
+            try:
+                sub_total = price_converter(\
+                    slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[0].text))
+                shipping = price_converter(\
+                    slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[1].text))
+                self.assertEqual(self.company.states()[random_state], shipping)
+                self.assertEqual(check_out_total, sub_total)
+                self.assertEqual(total, sub_total + shipping)
+            except NoSuchElementException:
+                screen_name = 'checkout_total_price_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
+                self.driver.save_screenshot(os.path.join(site_choice, screen_name))
         else:
-            self.assertEqual(total, check_out_total)
+            try:
+                self.assertEqual(total, check_out_total)
+            except:
+                screen_name = 'checkout_total_price_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
+                self.driver.save_screenshot(os.path.join(site_choice, screen_name))
 
         #TORNO AL CARRELLO
         cart = self.driver.find_element_by_xpath(self.company.button_back_paypal())
@@ -167,13 +202,18 @@ class BuyAProductTest(unittest.TestCase):
         if self.company.pay_ship():
             shipping_cart = price_converter(\
                 slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[1].text))
-            self.assertEqual(states[random_state], shipping_cart)
+            self.assertEqual(self.company.states()[random_state], shipping_cart)
         else:
             shipping_cart = 0
-        self.assertEqual(check_out_total, sub_total_cart)
-        total_cart = self.driver.find_element_by_xpath(self.company.get_total_price()).text
-        total_cart = price_converter(slice_prod_price(total_cart))
-        self.assertEqual(total_cart, sub_total_cart + shipping_cart)
+
+        try:
+            self.assertEqual(check_out_total, sub_total_cart)
+            total_cart = self.driver.find_element_by_xpath(self.company.get_total_price()).text
+            total_cart = price_converter(slice_prod_price(total_cart))
+            self.assertEqual(total_cart, sub_total_cart + shipping_cart)
+        except:
+            screen_name = 'cart_total_price_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
+            self.driver.save_screenshot(os.path.join(site_choice, screen_name))
 
         #FACCIO L'UPDATE DELLE QUANTITA'
         change_quantity = self.driver.find_elements_by_xpath(self.company.update_quantity())
@@ -190,47 +230,71 @@ class BuyAProductTest(unittest.TestCase):
             shipping_cart = price_converter( \
                 slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[1].text))
             self.assertEqual(new_total_price, sub_total_cart)
-            self.assertEqual(states[random_state], shipping_cart)
+            self.assertEqual(self.company.states()[random_state], shipping_cart)
         else:
             shipping_cart = 0
+            sub_total_cart = new_total_price
         total_cart = self.driver.find_element_by_xpath(self.company.get_total_price()).text
         total_cart = price_converter(slice_prod_price(total_cart))
-        self.assertEqual(total_cart, sub_total_cart + shipping_cart)
-        #checkout_area = self.driver.find_element_by_xpath("//div[@class='form-actions clearfix']")
+        try:
+            self.assertEqual(total_cart, sub_total_cart + shipping_cart)
+        except:
+            screen_name = 'update_cart_total_price_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
+            self.driver.save_screenshot(os.path.join(site_choice, screen_name))
+
         checkout_button = self.driver.find_element_by_xpath(self.company.go_check_out())
         checkout_button.click()
 
         check_out_total = check_out_total_func(self.driver)
         sub_total = price_converter(
             slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[0].text))
-        shipping = price_converter(
-            slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[1].text))
-        self.assertEqual(check_out_total, sub_total)
-        self.assertEqual(sub_total_cart, sub_total)
-        self.assertEqual(states[random_state], shipping)
-        total = self.driver.find_element_by_xpath(self.company.get_total_price()).text
-        total = price_converter(slice_prod_price(total))
-        self.assertEqual(total, sub_total + shipping)
+        if self.company.pay_ship():
+            shipping = price_converter(
+                slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[1].text))
+            self.assertEqual(self.company.states()[random_state], shipping)
+        else:
+            shipping = 0
 
-        terms_and_conditions = WebDriverWait(self.driver, 20).until( \
-            expected_conditions.presence_of_all_elements_located((By.ID, self.company.terms_and_conditions())))[0]
-        #self.assertFalse(terms_and_conditions.is_selected())
-        terms_and_conditions.submit()
+        #self.assertEqual(check_out_total, sub_total)
+        try:
+            total = self.driver.find_element_by_xpath(self.company.get_total_price()).text
+            total = price_converter(slice_prod_price(total))
+            self.assertEqual(sub_total_cart, sub_total)
+            self.assertEqual(total, sub_total + shipping)
+        except:
+            screen_name = 'update_checkout_total_price_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
+            self.driver.save_screenshot(os.path.join(site_choice, screen_name))
 
+        if self.company.return_to_terms_and_conditions():
+            terms_and_conditions = WebDriverWait(self.driver, 20).until( \
+                expected_conditions.presence_of_element_located((By.XPATH, self.company.terms_and_conditions())))
+            self.assertFalse(terms_and_conditions.is_selected())
+            terms_and_conditions.submit()
+        sleep(2)
         submit_button = self.driver.find_element_by_xpath(self.company.checkout_paypal())
         submit_button.click()
-        #PAGINA PAGAMENTO PAYPAL
         sleep(2)
-        if self.company.road_to_paypal():
-            money = float(self.driver.find_element_by_xpath("//span[@class='value']"))
-            self.assertEqual(money, total)
-            self.driver.find_element_by_xpath("//input[@value='08000001_Pay']").submit()
-            self.driver.find_element_by_xpath("//input[@id='confirm']").submit
 
+        #SE PRIMA BISOGNA ANDARE SU BNL O ALTRO (QUESTO PER PLM)
+        if self.company.road_to_paypal():
+            money = float(price_converter(self.driver.find_elements_by_xpath("//span[@class='value']")[-1].text))
+            self.assertEqual(money, total)
+            options = self.driver.find_elements_by_xpath("//input[@name='TARGET_TID']")[-1]
+            options.click()
+            sleep(2)
+            self.driver.execute_script('document.getElementById("confirm").click();')
+            sleep(2)
+
+        #PAGINA PAGAMENTO PAYPAL
         #CHECK PAGAMENTO PAYPAL
-        paypal_price = self.driver.find_element_by_xpath(self.company.pay_pal_price()).text.split(' E')[0]
-        paypal_price = price_converter('€ ' + paypal_price)
-        self.assertEqual(paypal_price, total)
+        try:
+            paypal_price = self.driver.find_elements_by_xpath(self.company.pay_pal_price())[0].text.split(' E')[0]
+            paypal_price = price_converter('€ ' + paypal_price)
+            self.assertEqual(paypal_price, total)
+        except:
+            screen_name = 'paypal_total_price_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
+            self.driver.save_screenshot(os.path.join(site_choice, screen_name))
+
         iframe = self.driver.find_elements_by_tag_name('iframe')[0]
         self.driver.switch_to.frame(iframe)
         email_address = self.driver.find_element_by_xpath("//input[@placeholder='Indirizzo email']")
@@ -242,17 +306,26 @@ class BuyAProductTest(unittest.TestCase):
             expected_conditions.presence_of_element_located((By.ID, "confirmButtonTop")))
 
         # CHECK PAGAMENTO
-        paypal_price = price_converter(
-            '€ ' + self.driver.find_element_by_xpath(self.company.pay_pal_price()).text.split(' E')[0])
-        self.assertEqual(paypal_price, total)
+        try:
+            paypal_price = price_converter(
+                 '€ ' + self.driver.find_element_by_xpath(self.company.pay_pal_price()).text.split(' E')[0])
+            self.assertEqual(paypal_price, total)
+        except:
+            screen_name = 'final_paypal_total_price_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
+            self.driver.save_screenshot(os.path.join(site_choice, screen_name))
         # check_out_paypal.click()
         # sleep(5)
-        # self.assertEqual(self.driver.current_url, "http://ux.tannerie.doppiozero.to/it/shop/checkout/complete/")
+        #try:
+            # self.assertEqual(self.driver.current_url, self.company.complete_url())
+        #except:
+            #screen_name = 'url_page_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
+            #self.driver.save_screenshot(os.path.join(site_choice, screen_name))
 
-    # @classmethod
-    # def tearDownClass(cls):
-    # #    #close the browser window
-    #     cls.driver.quit()
+
+    #@classmethod
+    #def tearDownClass(cls):
+        #close the browser window
+     #   cls.driver.quit()
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)

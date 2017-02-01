@@ -8,8 +8,6 @@ from time import gmtime, strftime, sleep
 path_to_chrome = '/home/ale/VirtuaPyCharm/bin/chrome/chromedriver'
 email = 'andrea.doppiozero-buyer@gmail.com'
 password = 'Nonlaso00'
-states = {'Austria': 15.0, 'Italia': 10.0, 'USA': 35.0}
-site_to_test = ['tannerie', 'plm', ]
 
 
 class Company(object):
@@ -33,6 +31,12 @@ class Company(object):
         return True
 
     def pay_ship(self):
+        return True
+
+    def select_state(self):
+        return True
+
+    def return_to_terms_and_conditions(self):
         return True
 
     def road_to_paypal(self):
@@ -121,7 +125,7 @@ class Tannerie(Company):
         return 'btn' and 'addedcart-btn' and 'pull-right'
 
     def terms_and_conditions(self):
-        return 'condizioni'
+        return "//label[@class='checkbox-label newsletter-label']"
 
     def go_check_out(self):
         return "//a[@class='btn btn-lg pull-right']"
@@ -132,9 +136,12 @@ class Tannerie(Company):
     def update_cart_btn(self):
         return "//button[@class='cart-update']"
 
+    def complete_url(self):
+        return 'http://ux.plm.doppiozero.to/shop/checkout/complete/'
 
 
-class Plm(Company):
+
+class Volley(Company):
 
     def wait_for_hidden(self):
         return True
@@ -151,12 +158,15 @@ class Plm(Company):
     def back_to_shop(self):
         return False
 
+    def select_state(self):
+        return False
+
     def states(self):
         states = ['Albania', 'Algeria']
         return states
 
     def get_url(self):
-        base_url = 'http://@dev:dev@ux.plm.doppiozero.to/shop/'
+        base_url = 'http://dev:dev@ux.atleti.volleysport.it/uomo/'
         return base_url
 
     def get_product_page_link(self):
@@ -197,19 +207,99 @@ class Plm(Company):
         return "//a[@class='btn form-actions__btn--checkout pull-right']"
 
     def checkout_paypal(self):
-        return "//button[@id='checkout_paypal' and @value='Pay now']"
+        return "//button[@class='btn form-actions__btn--next pull-right']"
 
     def update_cart_btn(self):
         return "//button[@class='btn-rotate cart__btn--update sliding sliding-update']"
 
 
+class Plm(Company):
+    def wait_for_hidden(self):
+        return True
+
+    def get_code(self):
+        return True
+
+    def pay_ship(self):
+        return False
+
+    def modal_page_code(self):
+        return False
+
+    def back_to_shop(self):
+        return False
+
+    def select_state(self):
+        return False
+
+    def states(self):
+        states = ['Albania', 'Algeria']
+        return states
+
+    def return_to_terms_and_conditions(self):
+        return False
+
+
+    def get_url(self):
+        base_url = 'http://@dev:dev@ux.plm.doppiozero.to/shop/'
+        return base_url
+
+    def get_product_page_link(self):
+        return "//h5[@class='product-thumb__title']"
+
+    def get_products_name(self):
+        return 'product-thumb__title'
+
+    def get_product_code(self):
+        path = "//div[@class='product-info__description']"
+        return path
+
+    def get_single_product_name(self):
+        return "//h1[@class='product-info__title']"
+
+    def get_single_product_price(self):
+        return "//span[@class='price']"
+
+    def get_modal_page_name(self):
+        return "//div[@class='col-sm-8 addedcart__dataprod']/h5"
+
+    def before_code(self):
+        return True
+
+    def continue_button(self):
+        return 'btn' and 'addedcart__btn' and 'addedcart__btn--continue'
+
+    def back_to_shopping(self):
+        return 'btn addedcart__btn addedcart__btn--continue'
+
+    def shopping_bag_button(self):
+        return 'btn' and 'addedcart__btn' and 'addedcart__btn--buy'
+
+    def terms_and_conditions(self):
+        return "//label[@class='control-label' and @for='id_condizioni_vendita']"
+
+    def button_back_paypal(self):
+        return "//a[@class='userpanel__link userpanel__link--shopcart sliding']"
+
+    def go_check_out(self):
+        return "//a[@class='btn form-actions__btn--checkout pull-right']"
+
+    def checkout_paypal(self):
+        return "//button[@class='btn form-actions__btn--next pull-right']"
+
+    def update_cart_btn(self):
+        return "//button[@class='btn-rotate cart__btn--update sliding sliding-update']"
+
+    def complete_url(self):
+        return 'http://ux.plm.doppiozero.to/shop/checkout/complete/'
+
+
 #-----PER AVVIARE LE ISTANZE-----------------
 
-site_to_test = {'tannerie' : Tannerie(), 'plm': Plm()}
-
+site_to_test = {'tannerie': Tannerie(), 'plm': Plm(), 'volley': Volley()}
 site_choice = input('Scegli il sito: ')
 site_choice = site_choice.lower()
-num_elements_to_test = int(input('quanti articoli vuoi comprare? '))
+num_elements_to_test = int(input('Quanti articoli vuoi comprare? '))
 print('Grazie, ora inizio il test sul sito ' + site_choice.capitalize())
 print('Ora del test: ' + strftime("%Y/%m/%d - %H:%M:%S", gmtime()))
 

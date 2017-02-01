@@ -3,7 +3,7 @@ FILE DA UTILIZZARE PER LANCIARE LA SUITE DI TEST
 ALL'INIZIO CHIEDE IL NOME DEL SITO DA TESTARE (AZIENDA) E QUANTI PRODOTTI SI VUOLE COMPRARE
 '''
 
-from GitHub.test_checkout.test_shop import BuyAProductTest
+from test_shop import BuyAProductTest
 import unittest
 
 buy_product_tests = unittest.TestLoader().loadTestsFromTestCase(BuyAProductTest)
