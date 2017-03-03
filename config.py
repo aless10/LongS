@@ -1,11 +1,15 @@
 '''
-Dati di configurazione e avvio per il test su tannery
+Dati di configurazione e avvio per il test su ecommerce
 '''
-
+import os
+import sys
 from time import gmtime, strftime, sleep
 
+home_path = sys.prefix
+chrome_pat = '/selenium/webdriver/chrome/chromedriver'
 # percorso per caricare il chromedriver
-path_to_chrome = '/home/ale/VirtuaPyCharm/bin/chrome/chromedriver'
+path_to_chrome = home_path + chrome_pat
+# dati account per acquisto con paypal
 email = 'andrea.doppiozero-buyer@gmail.com'
 password = 'Nonlaso00'
 
@@ -42,6 +46,14 @@ class Company(object):
     def road_to_paypal(self):
         return True
 
+    def wait_for_hidden(self):
+        hidden = ("//input[@type='hidden']",
+                  "//input[@type='hidden']",
+                  "//input[@id='id_quantity']",
+                  "//select[@id='id_option2']",
+                  )
+        return hidden
+
     def states(self):
         states = {'Austria': 15.0, 'Italia': 10.0, 'USA': 35.0}
         return states
@@ -52,11 +64,17 @@ class Company(object):
     def get_price(self):
         return "//span[@class='price']"
 
+    def modal_id(self):
+        return 'aggiuntoCarrello'
+
     def add_cart_btn(self):
         return "//button[@id='add_cart_btn']"
 
     def get_total_price(self):
         return "//div[@class='total']"
+
+    def get_sub_total_price(self):
+        return "//div[@class='order-totals']//div"
 
     def get_user_data(self):
         user_data = {
@@ -81,6 +99,15 @@ class Company(object):
     def pay_pal_price(self):
         return "//span[@class='ltrOverride ng-binding']"
 
+    def i_frame(self):
+        iframe = ('iframe',
+                  "//input[@placeholder='Indirizzo email']",
+                  'password',
+                  'btnLogin',
+                  'confirmButtonTop',
+                )
+        return iframe
+
 
 class Tannerie(Company):
 
@@ -98,7 +125,7 @@ class Tannerie(Company):
         return "//h2[@class='box-title']"
 
     def get_products_name(self):
-        return "box-title"
+        return "//h2[@class='box-title']"
 
     def get_product_code(self):
         return "//p[@class='product-code']"
@@ -140,11 +167,7 @@ class Tannerie(Company):
         return 'http://ux.plm.doppiozero.to/shop/checkout/complete/'
 
 
-
 class Volley(Company):
-
-    def wait_for_hidden(self):
-        return True
 
     def get_code(self):
         return True
@@ -166,39 +189,42 @@ class Volley(Company):
         return states
 
     def get_url(self):
-        base_url = 'http://dev:dev@ux.atleti.volleysport.it/uomo/'
+        base_url = 'http://dev:dev@ux.atleti.volleysport.it/shop/tutti-i-saldi/calzature-volley/'
         return base_url
 
     def get_product_page_link(self):
-        return "//h5[@class='product-thumb__title']"
+        return "//div[@class='info-prod']"
 
     def get_products_name(self):
-        return 'product-thumb__title'
+        return "//div[@class='info-prod']/h5"
 
-    def get_product_code(self):
-        path = "//div[@class='product-info__description']"
-        return path
+    def get_price(self):
+        return "//span[@class='prezzo-prod-scontato']"
 
     def get_single_product_name(self):
-        return "//h1[@class='product-info__title']"
+        return "//h4[@class='titolo-prodotto']"
+
+    def get_product_code(self):
+        path = "//p[@class='smallinfo']"
+        return path
 
     def get_single_product_price(self):
-        return "//span[@class='price']"
+        return "//span[@class='prezzo-prodotto-scontato']"
 
     def get_modal_page_name(self):
-        return "//div[@class='col-sm-8 addedcart__dataprod']/h5"
+        return "//div[@class='col-sm-8 aggiuntocarrello-datiprod']/h5"
 
     def before_code(self):
         return True
 
     def continue_button(self):
-        return 'btn' and 'addedcart__btn' and 'addedcart__btn--continue'
+        return 'btn-back' and 'continua'
 
     def back_to_shopping(self):
         return 'btn addedcart__btn addedcart__btn--continue'
 
     def shopping_bag_button(self):
-        return 'btn' and 'addedcart__btn' and 'addedcart__btn--buy'
+        return 'btn-salmon'
 
     def terms_and_conditions(self):
         return 'id_condizioni_vendita'
@@ -214,8 +240,9 @@ class Volley(Company):
 
 
 class Plm(Company):
+
     def wait_for_hidden(self):
-        return True
+        return False
 
     def get_code(self):
         return True
@@ -239,6 +266,12 @@ class Plm(Company):
     def return_to_terms_and_conditions(self):
         return False
 
+    def path_to_select_state(self):
+        path = ('id_billing_detail_state_chosen',
+                "//div[@class='chosen-search']/input[@type='text']",
+                "//li[@class='active-result highlighted']",
+                )
+        return path
 
     def get_url(self):
         base_url = 'http://@dev:dev@ux.plm.doppiozero.to/shop/'
@@ -248,11 +281,12 @@ class Plm(Company):
         return "//h5[@class='product-thumb__title']"
 
     def get_products_name(self):
-        return 'product-thumb__title'
+        return "//h5[@class='product-thumb__title']"
 
     def get_product_code(self):
-        path = "//div[@class='product-info__description']"
-        return path
+        product_code = ("//div[@class='product-info__description']/label[@class='product-info__label']",
+                        "//div[@class='product-info__description']", )
+        return product_code
 
     def get_single_product_name(self):
         return "//h1[@class='product-info__title']"
@@ -290,6 +324,13 @@ class Plm(Company):
     def update_cart_btn(self):
         return "//button[@class='btn-rotate cart__btn--update sliding sliding-update']"
 
+    def bnl_frame(self):
+        bnl_to_paypal = ("//span[@class='value']",
+                         "//input[@name='TARGET_TID']",
+                         'document.getElementById("confirm").click();',
+                        )
+        return bnl_to_paypal
+
     def complete_url(self):
         return 'http://ux.plm.doppiozero.to/shop/checkout/complete/'
 
@@ -297,7 +338,10 @@ class Plm(Company):
 #-----PER AVVIARE LE ISTANZE-----------------
 
 site_to_test = {'tannerie': Tannerie(), 'plm': Plm(), 'volley': Volley()}
-site_choice = input('Scegli il sito: ')
+print('Scegli il sito da testare tra quelli indicati')
+for company in site_to_test.keys():
+    print(company + '    ', end='\n')
+site_choice = input('Scrivi il nome del sito')
 site_choice = site_choice.lower()
 num_elements_to_test = int(input('Quanti articoli vuoi comprare? '))
 print('Grazie, ora inizio il test sul sito ' + site_choice.capitalize())

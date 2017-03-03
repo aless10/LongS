@@ -36,8 +36,8 @@ class BuyAProductTest(unittest.TestCase):
         n = 0
         products_info = {}
         while n < num_elements_to_test:
-            products_name = WebDriverWait(self.driver, 20).until(\
-                            expected_conditions.presence_of_all_elements_located((By.CLASS_NAME, self.company.get_products_name())))
+            products_name = WebDriverWait(self.driver, 20).until(
+                            expected_conditions.presence_of_all_elements_located((By.XPATH, self.company.get_products_name())))
             products_price = self.driver.find_elements_by_xpath(self.company.get_price())
 
             # scelgo un prodotto random
@@ -62,35 +62,35 @@ class BuyAProductTest(unittest.TestCase):
 
             #SALVO IL CODICE PRODOTTO
             if self.company.get_code():
-                right_div = self.driver.find_element_by_xpath(\
-                    "//div[@class='product-info__description']/label[@class='product-info__label']")
-                product_code = right_div.find_elements_by_xpath("//div[@class='product-info__description']")[1].text
+                right_div = self.driver.find_element_by_xpath(
+                    self.company.get_product_code()[0])
+                product_code = right_div.find_elements_by_xpath(self.company.get_product_code()[1])[1].text
                 product_code = slice_code(product_code)
             else:
                 product_code = slice_code(self.driver.find_element_by_xpath(self.company.get_product_code()).text)
 
             if self.company.wait_for_hidden():
-                WebDriverWait(self.driver, 10).until(\
-                    expected_conditions.invisibility_of_element_located((By.XPATH, "//input[@type='hidden']")))
-                WebDriverWait(self.driver, 10).until(\
-                    expected_conditions.invisibility_of_element_located((By.XPATH, "//input[@type='hidden']")))
-                WebDriverWait(self.driver, 10).until( \
-                    expected_conditions.invisibility_of_element_located((By.XPATH, "//input[@id='id_quantity']")))
-                WebDriverWait(self.driver, 10).until( \
-                    expected_conditions.invisibility_of_element_located((By.XPATH, "//select[@id='id_option2']")))
+                WebDriverWait(self.driver, 10).until(
+                    expected_conditions.invisibility_of_element_located((By.XPATH, self.company.wait_for_hidden()[0])))
+                WebDriverWait(self.driver, 10).until(
+                    expected_conditions.invisibility_of_element_located((By.XPATH, self.company.wait_for_hidden()[1])))
+                WebDriverWait(self.driver, 10).until(
+                    expected_conditions.invisibility_of_element_located((By.XPATH, self.company.wait_for_hidden()[2])))
+                WebDriverWait(self.driver, 10).until(
+                    expected_conditions.invisibility_of_element_located((By.XPATH, self.company.wait_for_hidden()[3])))
 
             add_cart_btn = self.driver.find_element_by_xpath(self.company.add_cart_btn())
             sleep(2)
             add_cart_btn.click()
             if self.company.is_modal():
-                modal_page = WebDriverWait(self.driver, 10).until(expected_conditions.visibility_of_element_located((\
-                                            By.CLASS_NAME, 'modal' and 'fade' and 'addedcart' and 'in')))
+                modal_page = WebDriverWait(self.driver, 10).until(expected_conditions.visibility_of_element_located((
+                                            By.ID, self.company.modal_id())))
                 modal_page = self.driver.find_element_by_xpath(self.company.get_modal_page_name())
                 modal_page_name = modal_page.text
                 self.assertEqual(modal_page_name, check_name)
                 if self.company.modal_page_code():
                     try:
-                        modal_page_code = slice_code(self.driver.find_element_by_xpath("//p[@class='product-code']").text)
+                        modal_page_code = slice_code(self.driver.find_element_by_xpath(self.company.get_product_code()).text)
                         self.assertEqual(modal_page_code, product_code)
                     except:
                         screen_name = 'modal_code_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
@@ -106,7 +106,7 @@ class BuyAProductTest(unittest.TestCase):
                     if self.company.back_to_shop():
                         WebDriverWait(self.driver, 10).until(expected_conditions.element_to_be_clickable((By.ID, 'productBack'))).click()
                     else:
-                        WebDriverWait(self.driver, 10).until(\
+                        WebDriverWait(self.driver, 10).until(
                         expected_conditions.element_to_be_clickable((By.XPATH, "//a[@href='/shop/']"))).click()
                     sleep(2)
                 else:
@@ -154,10 +154,10 @@ class BuyAProductTest(unittest.TestCase):
             selected_state = state.select_by_visible_text(random_state)
         else:
             random_state = random.choice(list(self.company.states()))
-            box_state = self.driver.find_element_by_id('id_billing_detail_state_chosen')
+            box_state = self.driver.find_element_by_id(self.company.path_to_select_state()[0])
             box_state.click()
-            input_box = self.driver.find_element_by_xpath("//div[@class='chosen-search']/input[@type='text']").send_keys(random_state)
-            self.driver.find_element_by_xpath("//li[@class='active-result highlighted']").click()
+            input_box = self.driver.find_element_by_xpath(self.company.path_to_select_state()[1]).send_keys(random_state)
+            self.driver.find_element_by_xpath(self.company.path_to_select_state()[2]).click()
         postal_code = self.driver.find_element_by_id(self.company.get_user_data()['postcode'])
         postal_code.send_keys('9999')
         phone = self.driver.find_element_by_id(self.company.get_user_data()['phone'])
@@ -166,7 +166,7 @@ class BuyAProductTest(unittest.TestCase):
         email_address.send_keys('test@example.com')
         text_area = self.driver.find_element_by_id(self.company.get_user_data()['add_instruction'])
         text_area.send_keys('Test Additional Instruction')
-        terms_and_conditions = WebDriverWait(self.driver, 20).until( \
+        terms_and_conditions = WebDriverWait(self.driver, 20).until(
               expected_conditions.presence_of_element_located((By.XPATH, self.company.terms_and_conditions()))).click()
         self.driver.find_element_by_xpath(self.company.checkout_paypal()).click()
         #FINE INSERIMENTO DATI
@@ -177,10 +177,10 @@ class BuyAProductTest(unittest.TestCase):
         total = price_converter(slice_prod_price(total))
         if self.company.pay_ship():
             try:
-                sub_total = price_converter(\
-                    slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[0].text))
-                shipping = price_converter(\
-                    slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[1].text))
+                sub_total = price_converter(
+                    slice_prod_price(self.driver.find_elements_by_xpath(self.company.get_sub_total_price())[0].text))
+                shipping = price_converter(
+                    slice_prod_price(self.driver.find_elements_by_xpath(self.company.get_sub_total_price())[1].text))
                 self.assertEqual(self.company.states()[random_state], shipping)
                 self.assertEqual(check_out_total, sub_total)
                 self.assertEqual(total, sub_total + shipping)
@@ -197,11 +197,11 @@ class BuyAProductTest(unittest.TestCase):
         #TORNO AL CARRELLO
         cart = self.driver.find_element_by_xpath(self.company.button_back_paypal())
         cart.click()
-        sub_total_cart = price_converter(\
-            slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[0].text))
+        sub_total_cart = price_converter(
+            slice_prod_price(self.driver.find_elements_by_xpath(self.company.get_sub_total_price())[0].text))
         if self.company.pay_ship():
-            shipping_cart = price_converter(\
-                slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[1].text))
+            shipping_cart = price_converter(
+                slice_prod_price(self.driver.find_elements_by_xpath(self.company.get_sub_total_price())[1].text))
             self.assertEqual(self.company.states()[random_state], shipping_cart)
         else:
             shipping_cart = 0
@@ -225,10 +225,10 @@ class BuyAProductTest(unittest.TestCase):
         # CHECK DEI VALORI
         new_total_price = check_products_prizes(self, self.driver, products_info)
         if self.company.pay_ship():
-            sub_total_cart = price_converter( \
-                slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[0].text))
-            shipping_cart = price_converter( \
-                slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[1].text))
+            sub_total_cart = price_converter(
+                slice_prod_price(self.driver.find_elements_by_xpath(self.company.get_sub_total_price())[0].text))
+            shipping_cart = price_converter(
+                slice_prod_price(self.driver.find_elements_by_xpath(self.company.get_sub_total_price())[1].text))
             self.assertEqual(new_total_price, sub_total_cart)
             self.assertEqual(self.company.states()[random_state], shipping_cart)
         else:
@@ -247,10 +247,10 @@ class BuyAProductTest(unittest.TestCase):
 
         check_out_total = check_out_total_func(self.driver)
         sub_total = price_converter(
-            slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[0].text))
+            slice_prod_price(self.driver.find_elements_by_xpath(self.company.get_sub_total_price())[0].text))
         if self.company.pay_ship():
             shipping = price_converter(
-                slice_prod_price(self.driver.find_elements_by_xpath("//div[@class='order-totals']//div")[1].text))
+                slice_prod_price(self.driver.find_elements_by_xpath(self.company.get_sub_total_price())[1].text))
             self.assertEqual(self.company.states()[random_state], shipping)
         else:
             shipping = 0
@@ -266,7 +266,7 @@ class BuyAProductTest(unittest.TestCase):
             self.driver.save_screenshot(os.path.join(site_choice, screen_name))
 
         if self.company.return_to_terms_and_conditions():
-            terms_and_conditions = WebDriverWait(self.driver, 20).until( \
+            terms_and_conditions = WebDriverWait(self.driver, 20).until(
                 expected_conditions.presence_of_element_located((By.XPATH, self.company.terms_and_conditions())))
             self.assertFalse(terms_and_conditions.is_selected())
             terms_and_conditions.submit()
@@ -277,12 +277,12 @@ class BuyAProductTest(unittest.TestCase):
 
         #SE PRIMA BISOGNA ANDARE SU BNL O ALTRO (QUESTO PER PLM)
         if self.company.road_to_paypal():
-            money = float(price_converter(self.driver.find_elements_by_xpath("//span[@class='value']")[-1].text))
+            money = float(price_converter(self.driver.find_elements_by_xpath(self.company.bnl_frame()[0])[-1].text))
             self.assertEqual(money, total)
-            options = self.driver.find_elements_by_xpath("//input[@name='TARGET_TID']")[-1]
+            options = self.driver.find_elements_by_xpath(self.company.bnl_frame()[1])[-1]
             options.click()
             sleep(2)
-            self.driver.execute_script('document.getElementById("confirm").click();')
+            self.driver.execute_script(self.company.bnl_frame()[2])
             sleep(2)
 
         #PAGINA PAGAMENTO PAYPAL
@@ -295,15 +295,15 @@ class BuyAProductTest(unittest.TestCase):
             screen_name = 'paypal_total_price_error_' + strftime("%Y_%m_%d_%H_%M_%S", gmtime()) + '.png'
             self.driver.save_screenshot(os.path.join(site_choice, screen_name))
 
-        iframe = self.driver.find_elements_by_tag_name('iframe')[0]
+        iframe = self.driver.find_elements_by_tag_name(self.company.i_frame()[0])[0]
         self.driver.switch_to.frame(iframe)
-        email_address = self.driver.find_element_by_xpath("//input[@placeholder='Indirizzo email']")
+        email_address = self.driver.find_element_by_xpath(self.company.i_frame()[1])
         email_address.send_keys(email)
-        password_driver = self.driver.find_element_by_id('password')
+        password_driver = self.driver.find_element_by_id(self.company.i_frame()[2])
         password_driver.send_keys(password)
-        self.driver.find_element_by_id('btnLogin').submit()
+        self.driver.find_element_by_id(self.company.i_frame()[3]).submit()
         check_out_paypal = WebDriverWait(self.driver, 20).until(\
-            expected_conditions.presence_of_element_located((By.ID, "confirmButtonTop")))
+            expected_conditions.presence_of_element_located((By.ID, self.company.i_frame()[4])))
 
         # CHECK PAGAMENTO
         try:
@@ -322,10 +322,10 @@ class BuyAProductTest(unittest.TestCase):
             #self.driver.save_screenshot(os.path.join(site_choice, screen_name))
 
 
-    #@classmethod
-    #def tearDownClass(cls):
+    @classmethod
+    def tearDownClass(cls):
         #close the browser window
-     #   cls.driver.quit()
+        cls.driver.quit()
 
 if __name__ == '__main__':
     unittest.main(verbosity=2)
