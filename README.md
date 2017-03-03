@@ -6,6 +6,7 @@ Guida all'utilizzo della suite di test per ecommerce Doppiozero
 
 0. Creazione ambiente virtuale
    >> virtualenv venvtest
+   
    >> source venvtest/bin/activate
 
 1. Installazione Selenium WebDriver:
