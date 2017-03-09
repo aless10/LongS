@@ -19,7 +19,7 @@ class BuyAProductTest(unittest.TestCase):
 
     @classmethod
     def setUp(cls):
-        cls.driver = webdriver.Chrome(path_to_chrome) #QUI AGGIUNGO IL PATH AL CHROMEDRIVER
+        cls.driver = webdriver.Chrome(path_to_chrome)
         cls.driver.maximize_window()
         cls.company = site
         # navigate to the application home page
@@ -69,7 +69,7 @@ class BuyAProductTest(unittest.TestCase):
             else:
                 product_code = slice_code(self.driver.find_element_by_xpath(self.company.get_product_code()).text)
 
-            if self.company.wait_for_hidden():
+            if self.company.wait_for_hidden_fields():
                 WebDriverWait(self.driver, 10).until(
                     expected_conditions.invisibility_of_element_located((By.XPATH, self.company.wait_for_hidden()[0])))
                 WebDriverWait(self.driver, 10).until(

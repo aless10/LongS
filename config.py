@@ -16,15 +16,13 @@ password = 'Nonlaso00'
 
 class Company(object):
 
-    def wait_for_hidden(self):
-        return True
-
+    #ha il codice prodotto
     def get_code(self):
         return False
-
+    # ha la modale quando clicco su acquista prodotto
     def is_modal(self):
         return True
-
+    #il codice prodotto è presente nella modale
     def modal_page_code(self):
         return True
 
@@ -33,19 +31,24 @@ class Company(object):
 
     def back_to_shop(self):
         return True
-
+    #spese di spedizione
     def pay_ship(self):
         return True
-
+    #selezionare lo stato di fatturazione
     def select_state(self):
         return True
-
+    #
     def return_to_terms_and_conditions(self):
         return True
-
+    #al pagamento direttamente su paypal
     def road_to_paypal(self):
         return True
+    
+    #Attende che i campi si nascondano
+    def wait_for_hidden_fields(self):
+        return True
 
+    #attendere che scelta quantità vengano nascosti
     def wait_for_hidden(self):
         hidden = ("//input[@type='hidden']",
                   "//input[@type='hidden']",
@@ -54,10 +57,11 @@ class Company(object):
                   )
         return hidden
 
+    #stati e prezzi di spedizione
     def states(self):
         states = {'Austria': 15.0, 'Italia': 10.0, 'USA': 35.0}
         return states
-
+    #cliccare e accettare i cookie
     def get_cookie(self):
         return "//a[@id='cookieChoiceDismiss']"
 
