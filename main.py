@@ -1,5 +1,7 @@
 import os
 import time
+
+import click as click
 from selenium import webdriver
 import datetime
 from selenium.webdriver.support.ui import WebDriverWait
@@ -57,6 +59,7 @@ def click_next_step(driver):
     next_step_button.click()
 
 
+@click.command()
 def main():
     tentative = 0
     logged = False
@@ -91,7 +94,3 @@ def main():
         except Exception as e:
             print(f"An exception occurred: {e}")
             logged = False
-
-
-if __name__ == '__main__':
-    main()
