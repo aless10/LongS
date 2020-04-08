@@ -5,3 +5,4 @@ selenium/webdriver/chrome
 __pycache__/
 dist/
 build
+html

@@ -10,6 +10,7 @@ CHROME_WEBDRIVER = os.path.join(os.path.dirname(__file__), "selenium/webdriver",
 BASE_URL = "https://www.esselungaacasa.it/ecommerce/nav/welcome/index.html"
 EMAIL = os.environ.get("EMAIL")
 PASSWORD = os.environ.get("PASSWORD")
+HTML_PATH = os.path.join(os.path.dirname(__file__), "html")
 
 RETRY_TIME = 60
 
@@ -20,8 +21,14 @@ def connect():
     return driver
 
 
+def save_html(driver, filename):
+    with open(os.path.join(HTML_PATH, f"{filename}.html"), "w") as writer:
+        writer.write(driver.page_source)
+
+
 def login(driver):
     driver.get(BASE_URL)
+    save_html(driver, "login")
     login_button = driver.find_element_by_xpath("/html/body/div[1]/esselunga-welcome-header/header/div/p/a[1]")
     login_button.click()
     mail_field = driver.find_element_by_id("gw_username")
@@ -35,6 +42,7 @@ def login(driver):
 
 
 def wait_for_available(driver):
+    save_html(driver, "slots")
     available = False
     while not available:
         print(f"Trying at {datetime.datetime.now()}")
@@ -84,13 +92,20 @@ def main():
                 wait_for_available(driver)
                 print("Pay!")
                 time.sleep(5)
+                save_html(driver, "pay")
                 click_next_step(driver)
                 print("Confirm!")
                 time.sleep(5)
+                save_html(driver, "confirm_checkout")
                 click_next_step(driver)
                 print("Completed!")
+                save_html(driver, "completed")
                 end = datetime.datetime.now()
                 print(f"It took {end - start}")
         except Exception as e:
             print(f"An exception occurred: {e}")
             logged = False
+
+
+if __name__ == "__main__":
+    main()
