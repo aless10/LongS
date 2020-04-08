@@ -6,6 +6,8 @@ from selenium import webdriver
 import datetime
 from selenium.webdriver.support.ui import WebDriverWait
 
+from send_mail import send_mail
+
 CHROME_WEBDRIVER = os.path.join(os.path.dirname(__file__), "selenium/webdriver", "chrome/chromedriver")
 BASE_URL = "https://www.esselungaacasa.it/ecommerce/nav/welcome/index.html"
 EMAIL = os.environ.get("EMAIL")
@@ -55,7 +57,7 @@ def wait_for_available(driver):
             driver.save_screenshot(f"{datetime.datetime.now()}_slots_found.png")
             driver.find_element_by_id("checkoutNextStep").click()
         else:
-            print(f"No slot available. Retrying in {RETRY_TIME} seconds")
+            print(f"No slots available. Retrying in {RETRY_TIME} seconds")
             time.sleep(RETRY_TIME)
             driver.refresh()
             time.sleep(3)
@@ -102,6 +104,8 @@ def main():
                 save_html(driver, "completed")
                 end = datetime.datetime.now()
                 print(f"It took {end - start}")
+                print("Sending confirmation email")
+                send_mail(EMAIL)
         except Exception as e:
             print(f"An exception occurred: {e}")
             logged = False
