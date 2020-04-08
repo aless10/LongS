@@ -1,3 +1,7 @@
 .idea
 .DS_Store
 selenium/webdriver/chrome
+*.egg-info/
+__pycache__/
+dist/
+build
