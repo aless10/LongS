@@ -1,24 +1,31 @@
+import os
 import time
 from selenium import webdriver
 import datetime
 from selenium.webdriver.support.ui import WebDriverWait
-import config
+
+CHROME_WEBDRIVER = os.path.join(os.path.dirname(__file__), "selenium/webdriver", "chrome/chromedriver")
+BASE_URL = "https://www.esselungaacasa.it/ecommerce/nav/welcome/index.html"
+EMAIL = os.environ.get("EMAIL")
+PASSWORD = os.environ.get("PASSWORD")
+
+RETRY_TIME = 60
 
 
 def connect():
-    driver = webdriver.Chrome(config.path_to_chrome)
+    driver = webdriver.Chrome(CHROME_WEBDRIVER)
     driver.maximize_window()
     return driver
 
 
 def login(driver):
-    driver.get(config.base_url)
+    driver.get(BASE_URL)
     login_button = driver.find_element_by_xpath("/html/body/div[1]/esselunga-welcome-header/header/div/p/a[1]")
     login_button.click()
     mail_field = driver.find_element_by_id("gw_username")
-    mail_field.send_keys(config.email)
+    mail_field.send_keys(EMAIL)
     password_field = driver.find_element_by_id("gw_password")
-    password_field.send_keys(config.password)
+    password_field.send_keys(PASSWORD)
     remember_me = driver.find_element_by_id("rememberme")
     remember_me.click()
     login_submit = driver.find_element_by_xpath("//*[@id='loginForm']/div/button")
@@ -38,8 +45,8 @@ def wait_for_available(driver):
             driver.save_screenshot(f"{datetime.datetime.now()}_slots_found.png")
             driver.find_element_by_id("checkoutNextStep").click()
         else:
-            print("No slot available. Retrying in 1 minute")
-            time.sleep(3600)
+            print(f"No slot available. Retrying in {RETRY_TIME} seconds")
+            time.sleep(RETRY_TIME)
             driver.refresh()
             time.sleep(3)
             click_next_step(driver)
@@ -51,23 +58,39 @@ def click_next_step(driver):
 
 
 def main():
-    d = connect()
-    with d as driver:
-        print("Login")
-        login(driver)
-        # Go checkout!
-        time.sleep(2)
-        go_checkout = driver.find_element_by_id("cassa")
-        go_checkout.click()
-        time.sleep(2)
-        print("Basket")
-        click_next_step(driver)
-        time.sleep(2)
-        wait_for_available(driver)
-        print("Pay!")
-        time.sleep(5)
-        click_next_step(driver)
-        print("Completed!")
+    tentative = 0
+    logged = False
+    while not logged:
+        tentative += 1
+        print(f"Tentative #{tentative}")
+        try:
+            d = connect()
+            logged = True
+            with d as driver:
+                start = datetime.datetime.now()
+                print("Login")
+                login(driver)
+                # Go checkout!
+                time.sleep(2)
+                go_checkout = driver.find_element_by_id("cassa")
+                go_checkout.click()
+                time.sleep(2)
+                print("Basket")
+                click_next_step(driver)
+                time.sleep(2)
+                wait_for_available(driver)
+                print("Pay!")
+                time.sleep(5)
+                click_next_step(driver)
+                print("Confirm!")
+                time.sleep(5)
+                click_next_step(driver)
+                print("Completed!")
+                end = datetime.datetime.now()
+                print(f"It took {end - start}")
+        except Exception as e:
+            print(f"An exception occurred: {e}")
+            logged = False
 
 
 if __name__ == '__main__':
