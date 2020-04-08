@@ -1,11 +1,10 @@
-# test-checkout
+# LongS checkouter
 
-Doppiozero - Test
 
 Guida all'utilizzo della suite di test per ecommerce Doppiozero
 
 0. Creazione ambiente virtuale
-   >> virtualenv venvtest
+   >> virtualenv venv
    
    >> source venvtest/bin/activate
 

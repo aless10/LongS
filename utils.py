@@ -1,6 +1,5 @@
 import os
 from time import gmtime, strftime
-from config import site_choice
 
 #FUNZIONE AUSILIARIA CHE MI PERMETTE DI CONVERTIRE I PREZZI IN NUMERI COSI' POSSO FARE I CALCOLI
 def price_converter(price):
