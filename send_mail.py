@@ -8,8 +8,9 @@ SERVICE_EMAIL = os.environ.get("SERVICE_EMAIL")
 SERVICE_PASSWORD = os.environ.get("SERVICE_PASSWORD")
 
 
-def send_mail(receiver_email, subject="[BOT] Esselunga's order confirmation"):
-    body = "Your order has been successfully delivered"
+def send_mail(receiver_email,
+              subject="[BOT] Esselunga's order confirmation",
+              body="Your order has been successfully delivered"):
     # Create a multipart message and set headers
     message = MIMEMultipart()
     message["From"] = SERVICE_EMAIL

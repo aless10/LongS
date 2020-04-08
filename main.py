@@ -1,4 +1,5 @@
 import os
+import sys
 import time
 
 import click as click
@@ -15,6 +16,7 @@ PASSWORD = os.environ.get("PASSWORD")
 HTML_PATH = os.path.join(os.path.dirname(__file__), "html")
 
 RETRY_TIME = 60
+MAX_TENTATIVE = 30
 
 
 def connect():
@@ -26,6 +28,14 @@ def connect():
 def save_html(driver, filename):
     with open(os.path.join(HTML_PATH, f"{filename}.html"), "w") as writer:
         writer.write(driver.page_source)
+
+
+def is_basket_full(driver):
+    time.sleep(2)
+    basket_items = driver.find_elements_by_xpath("//*[@id='shoppingTabList']/ul/li/a/span/span")[0].text
+    if int(basket_items) == 0:
+        print("No Items in the basket. Leaving...")
+        sys.exit(0)
 
 
 def login(driver):
@@ -53,6 +63,9 @@ def wait_for_available(driver):
         if slots:
             available = True
             print(f"{len(slots)} slots found.")
+            send_mail(EMAIL,
+                      subject="[BOT] Free slots found!",
+                      body=f"{datetime.datetime.now()}: {len(slots)} slots found!\nWe select the first available.")
             slots[0].click()
             driver.save_screenshot(f"{datetime.datetime.now()}_slots_found.png")
             driver.find_element_by_id("checkoutNextStep").click()
@@ -73,7 +86,7 @@ def click_next_step(driver):
 def main():
     tentative = 0
     logged = False
-    while not logged:
+    while not logged and tentative < MAX_TENTATIVE:
         tentative += 1
         print(f"Tentative #{tentative}")
         try:
@@ -83,6 +96,8 @@ def main():
                 start = datetime.datetime.now()
                 print("Login")
                 login(driver)
+                # Check if the basket is full or not. If no items => exit
+                is_basket_full(driver)
                 # Go checkout!
                 time.sleep(2)
                 go_checkout = driver.find_element_by_id("cassa")
