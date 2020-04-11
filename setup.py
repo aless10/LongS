@@ -11,7 +11,7 @@ with open(req_file, "r") as inst_reqs:
 
 setup(
     name="LongS Checkouter",
-    version="0.0.1",
+    version="0.1.0.dev",
     author="Me",
     description="",
     packages=[],
