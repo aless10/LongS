@@ -1,5 +1,7 @@
 # LongS checkouter
 
+Version = 1.0.0.dev
+
 ## What is it?
 
 Since it's difficult nowadays to book from Esselunga's website, I try to automate their availability by automate the checkout process.
