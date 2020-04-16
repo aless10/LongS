@@ -1,4 +1,4 @@
-checkouter/.idea
+
 .DS_Store
 selenium/webdriver/chrome
 *.egg-info/
@@ -8,3 +8,4 @@ build
 html
 *.log
 .env
+/.idea/
