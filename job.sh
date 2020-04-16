@@ -1,4 +1,4 @@
-#!/bin/zsh
+#!/bin/bash
 
 DIR_PATH=$(dirname "$0")
 

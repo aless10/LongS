@@ -10,14 +10,14 @@ from selenium.webdriver.support.ui import WebDriverWait
 
 from send_mail import send_mail
 
-CHROME_WEBDRIVER = os.path.join(os.path.dirname(__file__), "selenium/webdriver", "chrome/chromedriver")
+WEB_DRIVER = os.environ.get("WEB_DRIVER")
 BASE_URL = "https://www.esselungaacasa.it/ecommerce/nav/welcome/index.html"
 EMAIL = os.environ.get("EMAIL")
 PASSWORD = os.environ.get("PASSWORD")
 HTML_PATH = os.path.join(os.path.dirname(__file__), "html")
 
-RETRY_TIME = 5
-MAX_TENTATIVE = 1
+RETRY_TIME = 60
+MAX_TENTATIVE = 30
 
 
 log = logging.getLogger("esselunga")
@@ -31,7 +31,7 @@ log.info("Logger initialized correctly. The log file is at %s", log_filename)
 
 
 def connect():
-    driver = webdriver.Chrome(CHROME_WEBDRIVER)
+    driver = webdriver.Chrome()
     driver.maximize_window()
     return driver
 
@@ -105,7 +105,6 @@ def main():
     logged = False
     while not logged and tentative < MAX_TENTATIVE:
         tentative += 1
-        send_mail("alessio.izzo86@gmail.com", subject="[BOT] test logging", body="No body shape")
         log.info(f"Tentative #{tentative}")
         try:
             d = connect()
