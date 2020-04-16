@@ -1,6 +1,6 @@
 # LongS checkouter
 
-Version = 1.0.0.dev
+Version = 1.0.0
 
 ## What is it?
 
