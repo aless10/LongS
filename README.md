@@ -9,9 +9,9 @@ Note: this only works if there are items in the basket. I do not the shopping fo
 
 ## Let it work
 
-#### Single run
+### Single run
 After all the installation process, run the script ```job.sh``` (I know the name is horrible, suggestions are accepted!).
-#### Via a cron job
+### Via a cron job
 You can automate the script by adding a rule to crontab  
 
     crontab -e
@@ -20,11 +20,11 @@ and then `0 * * * * /path/to/the/checkouter/job.sh`. This is just an example. Yo
 
 ## How do I get it?
 
-#### Clone the repo
+### Clone the repo
 
-    git clone 
+    git clone git@github.com:aless10/LongS.git
 
-#### Run the setup script
+### Run the setup script
 
 Run ```setup.sh```. This will:
 
@@ -32,7 +32,7 @@ Run ```setup.sh```. This will:
    * install the dependencies
    * create the ``.env`` file where you store all the sensitive information and configuration
    
-#### The .env file
+### The .env file
 
 Here is a description of which environment variable you need:
 
@@ -46,7 +46,7 @@ Here is a description of which environment variable you need:
     
 The `SERVICE_EMAIL` is a gmail account from where the notification are sent. You must allow the "less secure apps" in order to work (https://support.google.com/accounts/answer/6010255?hl=en)
    
-#### Get the selenium web driver you want
+### Get the selenium web driver you want
 
 This application runs with selenium webdriver. You need to download and install a web driver. Here is a list:
 
