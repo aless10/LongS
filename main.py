@@ -16,7 +16,7 @@ EMAIL = os.environ.get("EMAIL")
 PASSWORD = os.environ.get("PASSWORD")
 HTML_PATH = os.path.join(os.path.dirname(__file__), "html")
 
-RETRY_TIME = 60
+RETRY_TIME = 40
 MAX_TENTATIVE = 30
 
 
@@ -31,7 +31,7 @@ log.info("Logger initialized correctly. The log file is at %s", log_filename)
 
 
 def connect():
-    driver = webdriver.Chrome()
+    driver = webdriver.Chrome(WEB_DRIVER)
     driver.maximize_window()
     return driver
 
